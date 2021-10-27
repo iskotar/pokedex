@@ -14,3 +14,14 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.container {
+  padding: 0 2rem;
+  width: 960px;
+  margin: auto;
+}
+
+.navbar {
+  background: orange;
+  padding: 15px;
+}
