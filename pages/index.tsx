@@ -7,66 +7,72 @@ import {useRouter} from "next/router";
 
 
 interface IPaginationButtons {
-    name: string;
-    offset: number
+  name: string;
+  offset: number
 }
 
 const Home: NextPage = () => {
-    const router = useRouter()
-    const [offset, setOffset] = useState(0);
-    const [input, setInput] = useState('');
-    const fetcher = (url: string) => fetch(url).then(res => res.json())
-    const {data, error} = useSWR(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=40`, fetcher);
+  const router = useRouter()
+  const [offset, setOffset] = useState(0);
+  const [input, setInput] = useState('');
+  const fetcher = (url: string) => fetch(url).then(res => res.json())
+  const {data, error} = useSWR(`https://pokeapi.co/api/v2/pokemon?offset=${offset}&limit=40`, fetcher);
 
-    if (error) return <div>failed to load</div>
-    if (!data) return <div>loading...</div>
+  if (error) return <div>failed to load due an Rrror: {error}</div>
 
-    const paginationButtons: IPaginationButtons[] = []
+  const paginationButtons: IPaginationButtons[] = []
 
+  if (data) {
     for (let i = 0; i < data.count; i = i + 40) {
-        paginationButtons.push({
-            name: `${i} - ${i + 40}`,
-            offset: i
-        })
+      paginationButtons.push({
+        name: `${i} - ${i + 40 > data.count ? data.count : i + 40}`,
+        offset: i
+      })
     }
+  }
 
-    return (
-        <MainContainer keywords={'Pokemon by Ivan Skotar'} title='Pokemon List'>
-            <button onClick={() => router.back()} style={{margin: '10px 0'}}>
-                {'<-- Back'}
-            </button>
+  return (
+    <MainContainer keywords={'Pokemon by Ivan Skotar'} title='Pokemon List'>
+      <button onClick={() => router.back()} style={{margin: '10px 0'}}>
+        {'<-- Back'}
+      </button>
 
-            <h1>Pokemon List</h1>
+      <h1>Pokemon List</h1>
 
-            <input
-                type="text"
-                value={input}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
-            />
-            <button onClick={() => router.push(`/pokemon/${input}`)}>Search</button>
+      <input
+        type="text"
+        value={input}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
+      />
+      <button onClick={() => router.push(`/pokemon/${input}`)}>Search</button>
 
-            <ul>
-                {data.results.map(({ name }:{ name: string}) =>
-                    <li key={name}>
-                        <Link href={`/pokemon/${name}`}>
-                            {name}
-                        </Link>
-                    </li>
-                )}
-            </ul>
+      {
+        data ?
+          <ul>
+            {data.results.map(({name}: { name: string }) =>
+              <li key={name}>
+                <Link href={`/pokemon/${name}`}>
+                  {name}
+                </Link>
+              </li>
+            )}
+          </ul>
+          :
+          <div>loading...</div>
+      }
 
-            {
-                paginationButtons.map(button => (
-                    <button
-                        key={button.name}
-                        onClick={() => setOffset(button.offset)}
-                    >
-                        {button.name}
-                    </button>
-                ))
-            }
-        </MainContainer>
-    )
+      {
+        paginationButtons.map(button => (
+          <button
+            key={button.name}
+            onClick={() => setOffset(button.offset)}
+          >
+            {button.name}
+          </button>
+        ))
+      }
+    </MainContainer>
+  )
 }
 
 export default Home
